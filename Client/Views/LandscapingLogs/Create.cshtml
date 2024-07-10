@@ -1,0 +1,259 @@
+﻿@model Client.Models.LandscapingLogModel.LandscapingLogDTO;
+@{
+    ViewBag.Title = "Add House";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Add Landscaping Log</h3>
+                    </div>
+                    <form id="landscapingLogForm" asp-action="Create" asp-controller="LandscapingLogs" enctype="multipart/form-data">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label asp-for="contractorsName">Contractor's Name</label>
+                                <input asp-for="contractorsName" type="text" class="form-control" placeholder="Enter Contractor's Name">
+                                <span asp-validation-for="contractorsName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="subContractorsName">Sub-Contractor's Name</label>
+                                <input asp-for="subContractorsName" type="text" class="form-control" placeholder="Enter Sub-Contractor's Name">
+                                <span asp-validation-for="subContractorsName" class="text-danger"></span>
+                            </div>
+                       @*     <div class="form-group">
+                                <label asp-for="workDate">Work Date</label>
+                                <input asp-for="workDate" type="date" class="form-control">
+                                <span asp-validation-for="workDate" class="text-danger"></span>
+                            </div>*@
+                            <div class="form-group">
+                                <label asp-for="propertyAddress">Property Address</label>
+                                <input asp-for="propertyAddress" type="text" class="form-control" placeholder="Enter Property Address">
+                                <span asp-validation-for="propertyAddress" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="locationCoordinates">Location Coordinates</label>
+                                <input asp-for="locationCoordinates" id="locationCoordinates" type="text" class="form-control" placeholder="Fetching Location...">
+                                <span asp-validation-for="locationCoordinates" class="text-danger"></span>
+                            </div>
+                         @*   <div class="form-group">
+                                <label asp-for="workStartTime">Work Start Time</label>
+                                <input asp-for="workStartTime" type="time" class="form-control">
+                                <span asp-validation-for="workStartTime" class="text-danger"></span>
+                            </div>*@
+                            <div class="form-group">
+                                <label asp-for="weatherCondition">Weather Condition</label>
+                                <input asp-for="weatherCondition" id="weatherCondition" type="text" class="form-control" placeholder="Fetching Weather...">
+                                <span asp-validation-for="weatherCondition" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="workCompletionTime">Work Completion Time</label>
+                                <input asp-for="workCompletionTime" type="time" class="form-control">
+                                <span asp-validation-for="workCompletionTime" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="descriptionOfWorkPerformed">Description of work performed</label>
+                                <textarea asp-for="descriptionOfWorkPerformed" class="form-control" placeholder="Enter Description of Work Performed"></textarea>
+                                <span asp-validation-for="descriptionOfWorkPerformed" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="difficultiesOrObstaclesEncountered">Difficulties or obstacles encountered</label>
+                                <textarea asp-for="difficultiesOrObstaclesEncountered" class="form-control" placeholder="Enter Difficulties or Obstacles Encountered"></textarea>
+                                <span asp-validation-for="difficultiesOrObstaclesEncountered" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="suppliesUsed">Supplies Used</label>
+                                <input asp-for="suppliesUsed" type="text" class="form-control" placeholder="Enter Supplies Used">
+                                <span asp-validation-for="suppliesUsed" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="generalCommentsOrObservations">General comments or observations (if any)</label>
+                                <textarea asp-for="generalCommentsOrObservations" class="form-control" placeholder="Enter General Comments or Observations"></textarea>
+                                <span asp-validation-for="generalCommentsOrObservations" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="area1">Area1</label>
+                                <input asp-for="area1" type="text" class="form-control" placeholder="Enter Area1">
+                                <span asp-validation-for="area1" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="area2">Area2</label>
+                                <input asp-for="area2" type="text" class="form-control" placeholder="Enter Area2">
+                                <span asp-validation-for="area2" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="area3">Area3</label>
+                                <input asp-for="area3" type="text" class="form-control" placeholder="Enter Area3">
+                                <span asp-validation-for="area3" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="area4">Area4</label>
+                                <input asp-for="area4" type="text" class="form-control" placeholder="Enter Area4">
+                                <span asp-validation-for="area4" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="area5">Area5</label>
+                                <input asp-for="area5" type="text" class="form-control" placeholder="Enter Area5">
+                                <span asp-validation-for="area5" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="preWorkPhotos">Pre-Work Photos</label>
+                                <input asp-for="preWorkPhotos" type="file" class="form-control" placeholder="Add Pre-Work Photos">
+                                <span asp-validation-for="preWorkPhotos" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="postWorkPhotos">Post-Work Photos</label>
+                                <input asp-for="postWorkPhotos" type="file" class="form-control" placeholder="Add Post-Work Photos">
+                                <span asp-validation-for="postWorkPhotos" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="comments">Comments</label>
+                                <textarea asp-for="comments" id="comments" class="form-control" placeholder="Speak your comments"></textarea>
+                                <span asp-validation-for="comments" class="text-danger"></span>
+                                <!-- Button to trigger voice input -->
+                                <button id="voiceInputBtn" class="btn btn-primary mt-2">Voice Input</button>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Add</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.card -->
+            </div>
+            <!--/.col (left) -->
+            <!-- right column -->
+            <div class="col-md-6">
+            </div>
+            <!--/.col (right) -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</section>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let isVoiceInputInProgress = false; // Flag to track if voice input is ongoing
+        let recognition; // Variable to hold the SpeechRecognition object
+        let timer; // Variable to hold the timer
+
+        // Function to fetch current location
+        function fetchLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async function (position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    document.getElementById('locationCoordinates').value = `${lat}, ${lon}`;
+
+                    // Fetch weather information
+                    await fetchWeather(lat, lon);
+                }, function (error) {
+                    console.error("Error fetching location: ", error);
+                });
+            } else {
+                console.error("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Function to fetch weather using OpenWeatherMap API
+        async function fetchWeather(lat, lon) {
+            const apiKey = '2449d374beb7f6d424246ec0447b2adb';
+            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+
+            try {
+                const response = await fetch(weatherUrl);
+                const data = await response.json();
+                const weatherDescription = data.weather[0].description;
+                document.getElementById('weatherCondition').value = weatherDescription;
+            } catch (error) {
+                console.error("Error fetching weather: ", error);
+            }
+        }
+
+        // Function to handle voice input
+        function startVoiceInput(voiceInputBtn) {
+            const commentsField = document.getElementById('comments');
+            recognition = new webkitSpeechRecognition(); // Create a SpeechRecognition object
+            recognition.lang = 'en-US'; // Set language to English (change as needed)
+            recognition.interimResults = false; // Disable interim results
+            recognition.maxAlternatives = 1; // Limit to one alternative result
+
+            // Event handler for when speech recognition results are available
+            recognition.onresult = function (event) {
+                const result = event.results[0][0].transcript; // Get the transcribed text
+                commentsField.value = result; // Populate the comment field with transcribed text
+            };
+
+            // Event handler for speech recognition errors
+            recognition.onerror = function (event) {
+                console.error('Speech recognition error:', event.error);
+            };
+
+            // Event handler for when speech recognition is ended
+            recognition.onend = function () {
+                console.log('Speech recognition ended.');
+                if (isVoiceInputInProgress) {
+                    // If voice input is still in progress, restart recognition
+                    startVoiceInput(voiceInputBtn);
+                } else {
+                    // Clear recognition object when not in progress
+                    recognition = null;
+                    // Enable voice input button
+                    voiceInputBtn.disabled = false;
+                }
+            };
+
+            // Start speech recognition
+            recognition.start();
+
+            // Set flag indicating voice input is in progress
+            isVoiceInputInProgress = true;
+
+            // Disable voice input button until voice input is completed
+            voiceInputBtn.disabled = true;
+
+            // Change button text to "Stop" while voice input is in progress
+            voiceInputBtn.textContent = "Stop";
+
+            // Start timer to stop voice input after 30 seconds
+            timer = setTimeout(function () {
+                stopVoiceInput();
+            }, 1000); // 7 seconds
+        }
+
+        // Function to stop voice input
+        function stopVoiceInput() {
+            if (recognition) {
+                // Stop speech recognition if it's in progress
+                recognition.stop();
+            }
+            // Set flag indicating voice input is not in progress
+            isVoiceInputInProgress = false;
+
+            // Clear the timer
+            clearTimeout(timer);
+
+            // Change button text back to "Voice Input" after stopping voice input
+            document.getElementById('voiceInputBtn').textContent = "Voice Input";
+        }
+
+        // Event listener for voice input button click
+        const voiceInputBtn = document.getElementById('voiceInputBtn');
+        voiceInputBtn.addEventListener('click', function () {
+            // Toggle voice input on and off based on current state
+            if (!isVoiceInputInProgress) {
+                startVoiceInput(voiceInputBtn);
+            } else {
+                stopVoiceInput();
+            }
+        });
+
+        // Initial fetch location
+        fetchLocation();
+    });
+</script>

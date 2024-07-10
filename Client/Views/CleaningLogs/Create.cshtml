@@ -1,0 +1,195 @@
+﻿@model Client.Models.CleaningLogsDTO
+@{
+    ViewBag.Title = "Add House";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Main content -->
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Add Cleaning Logs</h3>
+                    </div>
+                    <form id="cleaningLogForm" asp-action="Create" asp-controller="CleaningLogs" enctype="multipart/form-data">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label asp-for="contractorsName">Contractor's Name</label>
+                                <input asp-for="contractorsName" type="text" class="form-control" placeholder="Enter Contractor's Name">
+                                <span asp-validation-for="contractorsName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="employeeName">Employee Name</label>
+                                <input asp-for="employeeName" type="text" class="form-control" placeholder="Enter Employee Name">
+                                <span asp-validation-for="employeeName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="propertyAddress">Property Address</label>
+                                <input asp-for="propertyAddress" type="text" class="form-control" placeholder="Enter Property Address">
+                                <span asp-validation-for="propertyAddress" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="locationCoordinates">Location Coordinates</label>
+                                <input asp-for="locationCoordinates" id="locationCoordinates" type="text" class="form-control" placeholder="Fetching Location...">
+                                <span asp-validation-for="locationCoordinates" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="weatherCondition">Weather Condition</label>
+                                <input asp-for="weatherCondition" id="weatherCondition" type="text" class="form-control" placeholder="Fetching Weather...">
+                                <span asp-validation-for="weatherCondition" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="workCompletionTime">Work Completion Time</label>
+                                <input asp-for="workCompletionTime" type="time" class="form-control">
+                                <span asp-validation-for="workCompletionTime" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="descriptionOfWorkPerformed">Description of work performed</label>
+                                <textarea asp-for="descriptionOfWorkPerformed" class="form-control" placeholder="Enter Description of Work Performed"></textarea>
+                                <span asp-validation-for="descriptionOfWorkPerformed" class="text-danger"></span>
+                                <button class="btn btn-primary mt-2 voiceInputBtn">Voice Input</button>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="difficultiesOrObstaclesEncountered">Difficulties or obstacles encountered</label>
+                                <textarea asp-for="difficultiesOrObstaclesEncountered" class="form-control" placeholder="Enter Difficulties or Obstacles Encountered"></textarea>
+                                <span asp-validation-for="difficultiesOrObstaclesEncountered" class="text-danger"></span>
+                                <button class="btn btn-primary mt-2 voiceInputBtn">Voice Input</button>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="generalCommentsOrObservations">General comments or observations (if any)</label>
+                                <textarea asp-for="generalCommentsOrObservations" class="form-control" placeholder="Enter General Comments or Observations"></textarea>
+                                <span asp-validation-for="generalCommentsOrObservations" class="text-danger"></span>
+                                <button class="btn btn-primary mt-2 voiceInputBtn">Voice Input</button>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="photoFiles" class="control-label">Photos</label>
+                                <input asp-for="photoFiles" type="file" multiple class="form-control" />
+                                <span asp-validation-for="photoFiles" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="comments">Comments</label>
+                                <textarea asp-for="comments" id="comments" class="form-control" placeholder="Speak your comments"></textarea>
+                                <span asp-validation-for="comments" class="text-danger"></span>
+                                <button id="voiceInputBtnComments" class="btn btn-primary mt-2 voiceInputBtn" type="button">Voice Input</button>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-success">Add</button>
+                            <button asp-action="Index" asp-controller="CleaningLogs" type="submit" class="btn btn-primary">Back to List</button>
+                        </div>
+                    </form>
+                </div>
+                <!-- /.card -->
+            </div>
+
+            <!--/.col (left) -->
+            <!-- right column -->
+            <div class="col-md-6">
+            </div>
+            <!--/.col (right) -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.container-fluid -->
+</section>
+<!-- /.content -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let isVoiceInputInProgress = false;
+        let recognition;
+        let timer;
+
+        function fetchLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async function (position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    document.getElementById('locationCoordinates').value = `${lat}, ${lon}`;
+                    await fetchWeather(lat, lon);
+                }, function (error) {
+                    console.error("Error fetching location: ", error);
+                });
+            } else {
+                console.error("Geolocation is not supported by this browser.");
+            }
+        }
+
+        async function fetchWeather(lat, lon) {
+            const apiKey = '2449d374beb7f6d424246ec0447b2adb';
+            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+
+            try {
+                const response = await fetch(weatherUrl);
+                const data = await response.json();
+                const weatherDescription = data.weather[0].description;
+                document.getElementById('weatherCondition').value = weatherDescription;
+            } catch (error) {
+                console.error("Error fetching weather: ", error);
+            }
+        }
+
+        function startVoiceInput(button, targetFieldId) {
+            const targetField = document.getElementById(targetFieldId);
+            console.log("Starting voice input...");
+            recognition = new webkitSpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onresult = function (event) {
+                const result = event.results[0][0].transcript;
+                targetField.value = result;
+                console.log("Voice input recognized:", result);
+            };
+
+            recognition.onerror = function (event) {
+                console.error('Speech recognition error:', event.error);
+            };
+
+            recognition.onend = function () {
+                console.log('Voice input ended.');
+                if (isVoiceInputInProgress) {
+                    startVoiceInput(button, targetFieldId);
+                } else {
+                    recognition = null;
+                    button.disabled = false;
+                }
+            };
+
+            recognition.start();
+            isVoiceInputInProgress = true;
+            button.disabled = true;
+            button.textContent = "Stop";
+
+            timer = setTimeout(function () {
+                stopVoiceInput(button);
+            }, 30000);
+        }
+
+        function stopVoiceInput(button) {
+            if (recognition) {
+                recognition.stop();
+            }
+            isVoiceInputInProgress = false;
+            clearTimeout(timer);
+            button.textContent = "Voice Input";
+            button.disabled = false;
+        }
+
+        document.querySelectorAll('.voiceInputBtn').forEach(button => {
+            button.addEventListener('click', function () {
+                const targetFieldId = button.previousElementSibling.id;
+                if (!isVoiceInputInProgress) {
+                    startVoiceInput(button, targetFieldId);
+                } else {
+                    stopVoiceInput(button);
+                }
+            });
+        });
+
+        fetchLocation();
+    });
+</script>
