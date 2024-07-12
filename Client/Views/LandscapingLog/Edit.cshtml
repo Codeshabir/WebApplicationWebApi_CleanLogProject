@@ -52,28 +52,30 @@
                                 <span asp-validation-for="workCompletionTime" class="text-danger"></span>
                             </div>
                             <div class="form-group">
-                                <label asp-for="descriptionOfWorkPerformed">Description of work performed</label>
-                                <textarea asp-for="descriptionOfWorkPerformed" class="form-control" placeholder="Enter Description of Work Performed"></textarea>
-                                <span asp-validation-for="descriptionOfWorkPerformed" class="text-danger"></span>
-                                <button class="btn btn-primary mt-2 voiceInputBtn">Voice Input</button>
-                            </div>
-                            <div class="form-group">
+                              <label asp-for="descriptionOfWorkPerformed">Description of work performed</label>
+                              <textarea asp-for="descriptionOfWorkPerformed" id="descriptionOfWorkPerformed" class="form-control" placeholder="Enter Description of Work Performed"></textarea>
+                              <span asp-validation-for="descriptionOfWorkPerformed" class="text-danger"></span>
+                              <button type="button" id="voiceInputBtn1" class="btn btn-primary mt-2 voiceInputBtn">Voice Input</button>
+                              <button type="button" id="stopVoiceInputBtn1" class="btn btn-danger mt-2 stopVoiceInputBtn" style="display: none;">Stop</button>
+                          </div>
+                               <div class="form-group">
                                 <label asp-for="difficultiesOrObstaclesEncountered">Difficulties or obstacles encountered</label>
-                                <textarea asp-for="difficultiesOrObstaclesEncountered" class="form-control" placeholder="Enter Difficulties or Obstacles Encountered"></textarea>
+                                <textarea asp-for="difficultiesOrObstaclesEncountered" id="difficultiesOrObstaclesEncountered" class="form-control" placeholder="Enter Difficulties or Obstacles Encountered"></textarea>
                                 <span asp-validation-for="difficultiesOrObstaclesEncountered" class="text-danger"></span>
-                                <button class="btn btn-primary mt-2 voiceInputBtn">Voice Input</button>
+                                <button type="button" id="voiceInputBtn2" class="btn btn-primary mt-2 voiceInputBtn">Voice Input</button>
+                                <button type="button" id="stopVoiceInputBtn2" class="btn btn-danger mt-2 stopVoiceInputBtn" style="display: none;">Stop</button>
                             </div>
                             <div class="form-group">
                                 <label asp-for="suppliesUsed">Supplies Used</label>
                                 <textarea asp-for="suppliesUsed" class="form-control" placeholder="Enter Supplies Used"></textarea>
                                 <span asp-validation-for="suppliesUsed" class="text-danger"></span>
-                                <button class="btn btn-primary mt-2 voiceInputBtn">Voice Input</button>
                             </div>
                             <div class="form-group">
                                 <label asp-for="generalCommentsOrObservations">General comments or observations (if any)</label>
-                                <textarea asp-for="generalCommentsOrObservations" class="form-control" placeholder="Enter General Comments or Observations"></textarea>
+                                <textarea asp-for="generalCommentsOrObservations" id="generalCommentsOrObservations" class="form-control" placeholder="Enter General Comments or Observations"></textarea>
                                 <span asp-validation-for="generalCommentsOrObservations" class="text-danger"></span>
-                                <button class="btn btn-primary mt-2 voiceInputBtn">Voice Input</button>
+                                <button type="button" id="voiceInputBtn3" class="btn btn-primary mt-2 voiceInputBtn">Voice Input</button>
+                                <button type="button" id="stopVoiceInputBtn3" class="btn btn-danger mt-2 stopVoiceInputBtn" style="display: none;">Stop</button>
                             </div>
                             <div class="form-group">
                                 <label asp-for="area1">Area 1</label>
@@ -137,11 +139,12 @@
                             </div>
 
                             <div class="form-group">
-                                <label asp-for="comments">Comments</label>
-                                <textarea asp-for="comments" id="comments" class="form-control" placeholder="Speak your comments"></textarea>
-                                <span asp-validation-for="comments" class="text-danger"></span>
-                                <button id="voiceInputBtnComments" class="btn btn-primary mt-2 voiceInputBtn" type="button">Voice Input</button>
-                            </div>
+                        <label asp-for="comments">Comments</label>
+                        <textarea asp-for="comments" id="comments" class="form-control" placeholder="Speak your comments"></textarea>
+                        <span asp-validation-for="comments" class="text-danger"></span>
+                        <button type="button" id="voiceInputBtn4" class="btn btn-primary mt-2 voiceInputBtn">Voice Input</button>
+                        <button type="button" id="stopVoiceInputBtn4" class="btn btn-danger mt-2 stopVoiceInputBtn" style="display: none;">Stop</button>
+                    </div>
                         </div>
                         <!-- /.card-body -->
                         <div class="card-footer">
@@ -164,19 +167,17 @@
 </section>
 <!-- /.content -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        let isVoiceInputInProgress = false; // Flag to track if voice input is ongoing
-        let recognition; // Variable to hold the SpeechRecognition object
+        document.addEventListener("DOMContentLoaded", function () {
+        let isVoiceInputInProgress = false;
+        let recognition;
+        let timer;
 
-        // Function to fetch current location
         function fetchLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async function (position) {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     document.getElementById('locationCoordinates').value = `${lat}, ${lon}`;
-
-                    // Fetch weather information
                     await fetchWeather(lat, lon);
                 }, function (error) {
                     console.error("Error fetching location: ", error);
@@ -186,71 +187,104 @@
             }
         }
 
-        // Function to fetch weather using OpenWeatherMap API
         async function fetchWeather(lat, lon) {
             const apiKey = '2449d374beb7f6d424246ec0447b2adb';
-            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`;
 
             try {
                 const response = await fetch(weatherUrl);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch weather data.');
-                }
                 const data = await response.json();
                 const weatherDescription = data.weather[0].description;
-                const temperature = data.main.temp;
-                document.getElementById('weatherCondition').value = `${weatherDescription}, ${temperature}°C`;
+                document.getElementById('weatherCondition').value = weatherDescription;
             } catch (error) {
-                console.error('Error fetching weather: ', error);
+                console.error("Error fetching weather: ", error);
             }
         }
 
-        // Initialize voice recognition
-        function initializeVoiceRecognition() {
-            recognition = new window.webkitSpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
+        function startVoiceInput(button) {
+            let targetField;
+            switch (button.id) {
+                case 'voiceInputBtn1':
+                    targetField = document.getElementById('descriptionOfWorkPerformed');
+                    break;
+                case 'voiceInputBtn2':
+                    targetField = document.getElementById('difficultiesOrObstaclesEncountered');
+                    break;
+                case 'voiceInputBtn3':
+                    targetField = document.getElementById('generalCommentsOrObservations');
+                    break;
+                case 'voiceInputBtn4':
+                    targetField = document.getElementById('comments');
+                    break;
+            }
+
+            recognition = new webkitSpeechRecognition();
             recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
 
-            recognition.onstart = function () {
-                isVoiceInputInProgress = true;
-                console.log('Voice recognition started.');
-            };
-
-            recognition.onend = function () {
-                isVoiceInputInProgress = false;
-                console.log('Voice recognition ended.');
-                // Submit the form when voice recognition ends
-                document.getElementById('landscapingLogForm').submit();
+            recognition.onresult = function (event) {
+                const result = event.results[0][0].transcript;
+                targetField.value = result;
             };
 
             recognition.onerror = function (event) {
-                isVoiceInputInProgress = false;
-                console.error('Voice recognition error: ', event.error);
+                console.error('Speech recognition error:', event.error);
             };
 
-            recognition.onresult = function (event) {
-                const transcript = event.results[0][0].transcript;
-                const inputField = document.activeElement;
-                if (inputField) {
-                    inputField.value += transcript;
+            recognition.onend = function () {
+                if (isVoiceInputInProgress) {
+                    startVoiceInput(button);
+                } else {
+                    recognition = null;
+                    button.disabled = false;
+                    button.nextElementSibling.style.display = 'none';
                 }
             };
+
+            recognition.start();
+            isVoiceInputInProgress = true;
+            button.disabled = true;
+            button.textContent = "Recording...";
+            button.nextElementSibling.style.display = 'inline-block';
+            button.nextElementSibling.disabled = false;
+
+            timer = setTimeout(function () {
+                stopVoiceInput(button);
+            }, 60000); // 60 seconds
         }
 
-        // Voice input button click event
-        document.querySelectorAll('.voiceInputBtn').forEach(function (button) {
-            button.addEventListener('click', function () {
+        function stopVoiceInput(button) {
+            if (recognition) {
+                recognition.stop();
+            }
+            isVoiceInputInProgress = false;
+            clearTimeout(timer);
+            button.textContent = "Voice Input";
+            button.disabled = false;
+            button.nextElementSibling.style.display = 'none';
+        }
+
+        document.querySelectorAll('.voiceInputBtn').forEach(button => {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
                 if (!isVoiceInputInProgress) {
-                    initializeVoiceRecognition();
-                    recognition.start();
-                } else {
-                    recognition.stop();
+                    startVoiceInput(button);
                 }
             });
         });
 
-        // Fetch location and weather on page load
+        document.querySelectorAll('.stopVoiceInputBtn').forEach(stopButton => {
+            stopButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                const voiceInputButton = stopButton.previousElementSibling;
+                if (isVoiceInputInProgress) {
+                    stopVoiceInput(voiceInputButton);
+                }
+            });
+        });
+
         fetchLocation();
     });
+
 </script>
