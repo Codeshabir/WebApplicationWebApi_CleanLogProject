@@ -18,13 +18,17 @@ namespace Client.Controllers
         private readonly IWebHostEnvironment _hostEnvironment;
 
 
-        public CleaningLogsAPIController(LogDbContext context,IWebHostEnvironment hostEnvironment)
-        {
-            _context = context;
-            _hostEnvironment = hostEnvironment;
-        }
-       
-        [HttpGet] // Remove this attribute since the method is commented out
+		private readonly ILogger<CleaningLogsAPIController> _logger;
+
+		public CleaningLogsAPIController(LogDbContext context, IWebHostEnvironment hostEnvironment, ILogger<CleaningLogsAPIController> logger)
+		{
+			_context = context;
+			_hostEnvironment = hostEnvironment;
+			_logger = logger;
+		}
+
+
+		[HttpGet] // Remove this attribute since the method is commented out
         public async Task<ActionResult<IEnumerable<CleaningLog>>> GetCleaningLogs()
         {
             var list = await _context.houseCleaningLogs.ToListAsync();
@@ -101,18 +105,92 @@ namespace Client.Controllers
             return CreatedAtAction("GetCleaningLog", new { id = cleaningLog.Id }, cleaningLog);
         }
 
+        //[HttpPut("{id}")]
+        //public async Task<IActionResult> PutCleaningLog(int? id, [FromForm] CleaningLogsDTO cleaningLogDto)
+        //{
+
+        //    var cleaningLog = await _context.houseCleaningLogs.FindAsync(id);
+        //    if (cleaningLog == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    // Update properties from the DTO
+        //    cleaningLog.Date = cleaningLogDto.date;
+        //    cleaningLog.ContractorsName = cleaningLogDto.contractorsName;
+        //    cleaningLog.EmployeeName = cleaningLogDto.employeeName;
+        //    cleaningLog.WorkDate = cleaningLogDto.workDate;
+        //    cleaningLog.PropertyAddress = cleaningLogDto.propertyAddress;
+        //    cleaningLog.LocationCoordinates = cleaningLogDto.locationCoordinates;
+        //    cleaningLog.WorkStartTime = cleaningLogDto.workStartTime;
+        //    cleaningLog.WeatherCondition = cleaningLogDto.weatherCondition;
+        //    cleaningLog.WorkCompletionTime = cleaningLogDto.workCompletionTime;
+        //    cleaningLog.DescriptionOfWorkPerformed = cleaningLogDto.descriptionOfWorkPerformed;
+        //    cleaningLog.DifficultiesOrObstaclesEncountered = cleaningLogDto.difficultiesOrObstaclesEncountered;
+        //    cleaningLog.GeneralCommentsOrObservations = cleaningLogDto.generalCommentsOrObservations;
+        //    cleaningLog.Comments = cleaningLogDto.comments;
+
+        //    // Handle photos if any
+        //    var photoFileNames = new List<string>();
+        //    if (cleaningLogDto.photoFiles != null && cleaningLogDto.photoFiles.Any())
+        //    {
+        //        foreach (var file in cleaningLogDto.photoFiles)
+        //        {
+        //            if (file.Length > 0)
+        //            {
+        //                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+        //                var filePath = Path.Combine(_hostEnvironment.WebRootPath, "images", fileName);
+
+        //                using (var stream = new FileStream(filePath, FileMode.Create))
+        //                {
+        //                    await file.CopyToAsync(stream);
+        //                }
+
+        //                photoFileNames.Add(fileName);
+        //            }
+        //        }
+        //        cleaningLog.Photos = string.Join(",", photoFileNames);
+        //    }
+
+        //    _context.Entry(cleaningLog).State = EntityState.Modified;
+
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        if (!CleaningLogExists(id))
+        //        {
+        //            return NotFound();
+        //        }
+        //        else
+        //        {
+        //            throw;
+        //        }
+        //    }
+
+        //    return NoContent();
+        //}
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCleaningLog(int? id, [FromForm] CleaningLogsDTO cleaningLogDto)
+        public async Task<IActionResult> PutCleaningLog(int id, [FromForm] CleaningLogsDTO cleaningLogDto)
         {
-            
+            // Validate ID
+            if (id <= 0)
+            {
+                _logger.LogWarning("Update attempt with invalid ID");
+                return BadRequest("Invalid ID");
+            }
+
+            // Fetch the existing cleaning log
             var cleaningLog = await _context.houseCleaningLogs.FindAsync(id);
             if (cleaningLog == null)
             {
-                return NotFound();
+                _logger.LogWarning("Cleaning Log with ID {id} not found", id);
+                return NotFound("Cleaning log not found.");
             }
 
             // Update properties from the DTO
-            cleaningLog.Date = cleaningLogDto.date;
             cleaningLog.ContractorsName = cleaningLogDto.contractorsName;
             cleaningLog.EmployeeName = cleaningLogDto.employeeName;
             cleaningLog.WorkDate = cleaningLogDto.workDate;
@@ -126,9 +204,9 @@ namespace Client.Controllers
             cleaningLog.GeneralCommentsOrObservations = cleaningLogDto.generalCommentsOrObservations;
             cleaningLog.Comments = cleaningLogDto.comments;
 
-            // Handle photos if any
+            // Handle photo files
             var photoFileNames = new List<string>();
-            if (cleaningLogDto.photoFiles != null && cleaningLogDto.photoFiles.Any())
+            if (cleaningLogDto.photoFiles != null && cleaningLogDto.photoFiles.Count > 0)
             {
                 foreach (var file in cleaningLogDto.photoFiles)
                 {
@@ -148,37 +226,49 @@ namespace Client.Controllers
                 cleaningLog.Photos = string.Join(",", photoFileNames);
             }
 
+            // Mark entity as modified and save changes
             _context.Entry(cleaningLog).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("Successfully updated Cleaning Log with ID {id}", id);
+                return Ok(new { message = "Cleaning log updated successfully." });
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
+                _logger.LogError(ex, "Concurrency exception while updating Cleaning Log with ID {id}", id);
                 if (!CleaningLogExists(id))
                 {
-                    return NotFound();
+                    return NotFound("Cleaning log not found.");
                 }
                 else
                 {
                     throw;
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating Cleaning Log with ID {id}", id);
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the cleaning log.");
+            }
+        }
 
-            return NoContent();
+        private bool CleaningLogExists(int id)
+        {
+            return _context.houseCleaningLogs.Any(e => e.Id == id);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCleaningLog(int id)
         {
-            var houseCleaningLog = await _context.landscapingLogs.FindAsync(id);
+            var houseCleaningLog = await _context.houseCleaningLogs.FindAsync(id);
             if (houseCleaningLog == null)
             {
                 return NotFound();
             }
 
-            _context.landscapingLogs.Remove(houseCleaningLog);
+            _context.houseCleaningLogs.Remove(houseCleaningLog);
             await _context.SaveChangesAsync();
 
             return NoContent();

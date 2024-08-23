@@ -52,7 +52,6 @@ namespace Client.Controllers
             return View();
         }
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CleaningLogsDTO house)
         {
             //if (ModelState.IsValid)
@@ -102,7 +101,6 @@ namespace Client.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, CleaningLogsDTO house)
         {
             if (id != house.id)
@@ -110,8 +108,8 @@ namespace Client.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
-            {
+            //if (ModelState.IsValid)
+            //{
                 var photoFileNames = new List<string>();
 
                 if (house.photoFiles != null && house.photoFiles.Any())
@@ -137,7 +135,7 @@ namespace Client.Controllers
 
                 await _cleaninglogsService.UpdateCleaningLogsAsync(house); // Implement this method in your service
                 return RedirectToAction(nameof(Index));
-            }
+           // }
 
             return View(house);
         }

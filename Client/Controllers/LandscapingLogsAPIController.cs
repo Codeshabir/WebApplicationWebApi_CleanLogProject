@@ -225,7 +225,7 @@ namespace Client.Controllers
 
         private bool LandscapingLogExists(int? id)
         {
-            return _context.houseCleaningLogs.Any(e => e.Id == id);
+            return _context.landscapingLogs.Any(e => e.Id == id);
         }
     }
 }
