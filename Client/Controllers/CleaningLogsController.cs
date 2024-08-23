@@ -113,7 +113,7 @@ namespace Client.Controllers
                 var photoFileNames = new List<string>();
 
                 if (house.photoFiles != null && house.photoFiles.Any())
-                {
+                { 
                     foreach (var file in house.photoFiles)
                     {
                         if (file.Length > 0)
