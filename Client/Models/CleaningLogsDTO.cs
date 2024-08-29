@@ -6,7 +6,7 @@ namespace Client.Models
 {
     public class CleaningLogsDTO
     {
-        public int id { get; set; }
+        public int? id { get; set; }
         public DateTime date { get; set; }
         public string? contractorsName { get; set; }
         public string? employeeName { get; set; }

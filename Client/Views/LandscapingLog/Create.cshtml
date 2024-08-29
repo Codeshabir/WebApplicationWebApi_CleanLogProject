@@ -142,7 +142,132 @@
 </section>
 <!-- /.content -->
 
+
+
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let isVoiceInputInProgress = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+
+        function recordAudio() {
+            return new Promise((resolve, reject) => {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        mediaRecorder = new MediaRecorder(stream);
+
+                        mediaRecorder.ondataavailable = event => {
+                            audioChunks.push(event.data);
+                        };
+
+                        mediaRecorder.onstop = () => {
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                            resolve(audioBlob);
+                            audioChunks = []; // Clear chunks for next recording
+                        };
+
+                        mediaRecorder.onerror = event => {
+                            reject(event.error);
+                        };
+
+                        mediaRecorder.start();
+
+                        // Automatically stop after a specific time (e.g., 60 seconds)
+                        setTimeout(() => {
+                            if (mediaRecorder && mediaRecorder.state === "recording") {
+                                mediaRecorder.stop();
+                            }
+                        }, 60000); // 60 seconds
+                    })
+                    .catch(error => {
+                        reject(error);
+                    });
+            });
+        }
+
+        function startVoiceInput(button) {
+            let targetField;
+
+            switch (button.id) {
+                case 'voiceInputBtn1':
+                    targetField = document.getElementById('descriptionOfWorkPerformed');
+                    break;
+                case 'voiceInputBtn2':
+                    targetField = document.getElementById('difficultiesOrObstaclesEncountered');
+                    break;
+                case 'voiceInputBtn3':
+                    targetField = document.getElementById('generalCommentsOrObservations');
+                    break;
+                case 'voiceInputBtn4':
+                    targetField = document.getElementById('comments');
+                    break;
+            }
+
+            button.disabled = true;
+            button.textContent = "Recording...";
+
+            recordAudio().then(audioBlob => {
+                const formData = new FormData();
+                formData.append('audio', audioBlob);
+                debugger
+                fetch('/api/Speech/recognize', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        targetField.value = data.transcript;
+                        button.textContent = "Voice Input";
+                        button.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error('Error during voice input:', error);
+                        button.textContent = "Voice Input";
+                        button.disabled = false;
+                    })
+                    .finally(() => {
+                        isVoiceInputInProgress = false;
+                    });
+            }).catch(error => {
+                console.error('Error recording audio:', error);
+                button.textContent = "Voice Input";
+                button.disabled = false;
+                isVoiceInputInProgress = false;
+            });
+        }
+
+        function stopVoiceInput(button) {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+            }
+            isVoiceInputInProgress = false;
+            button.textContent = "Voice Input";
+            button.disabled = false;
+        }
+
+        document.querySelectorAll('.voiceInputBtn').forEach(button => {
+            button.addEventListener('click', function (event) {
+                event.preventDefault();
+                if (!isVoiceInputInProgress) {
+                    startVoiceInput(button);
+                    isVoiceInputInProgress = true;
+                    button.nextElementSibling.style.display = 'inline-block';
+                }
+            });
+        });
+
+        document.querySelectorAll('.stopVoiceInputBtn').forEach(stopButton => {
+            stopButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                stopVoiceInput(stopButton.previousElementSibling);
+                stopButton.style.display = 'none';
+            });
+        });
+    });
+
+</script>
+
+@* <script>
     document.addEventListener("DOMContentLoaded", function () {
     let isVoiceInputInProgress = false;
     let recognition;
@@ -263,4 +388,4 @@
     fetchLocation();
 });
 
-</script>
+</script> *@

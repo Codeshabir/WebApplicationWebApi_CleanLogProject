@@ -19,6 +19,12 @@ builder.Services.AddDbContext<LogDbContext>(options =>
 builder.Services.AddScoped<CleaningLogsService>();
 builder.Services.AddScoped<LandscapingLogsService>();
 builder.Services.AddScoped<SnowLogsService>();
+builder.Services.AddScoped<SpeechToTextService>(provider =>
+{
+    // Configure and return an instance of SpeechToTextService
+    var modelPath = configuration.GetValue<string>("SpeechToText:ModelPath");
+    return new SpeechToTextService(modelPath);
+});
 
 // Add a named HttpClient with the base URL for API requests
 var baseUrl = configuration.GetSection("ApiSettings:BaseUrl").Value;

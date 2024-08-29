@@ -101,7 +101,7 @@ namespace Client.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, CleaningLogsDTO house)
+        public async Task<IActionResult> Edit(int? id, CleaningLogsDTO house)
         {
             if (id != house.id)
             {
