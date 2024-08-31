@@ -65,7 +65,7 @@ namespace Client.Controllers
                 Date = cleaningLogDto.date,
                 ContractorsName = cleaningLogDto.contractorsName,
                 EmployeeName = cleaningLogDto.employeeName,
-                WorkDate = cleaningLogDto.workDate,
+                WorkDate = DateTime.Now,
                 PropertyAddress = cleaningLogDto.propertyAddress,
                 LocationCoordinates = cleaningLogDto.locationCoordinates,
                 WorkStartTime = cleaningLogDto.workStartTime,
