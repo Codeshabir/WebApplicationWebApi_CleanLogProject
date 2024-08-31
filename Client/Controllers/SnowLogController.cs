@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace Client.Controllers
 {
 
-
+    [Authorize]
     public class SnowLogController : Controller
     {
         private readonly SnowLogsService _snowlogsService;

@@ -27,7 +27,8 @@
 
 		<div class="wrapper">
 			<div id="loader"></div>
-
+		@if (!Context.Request.Path.Value.ToLower().Contains("/identity/account/login") && !Context.Request.Path.Value.ToLower().Contains("/identity/account/register"))
+		{
 			<header class="main-header">
 				<div class="d-flex align-items-center logo-box justify-content-start">
 					<!-- Logo -->
@@ -43,6 +44,7 @@
 						</div>
 					</a>
 				</div>
+			
 				<!-- Header Navbar -->
 				<nav class="navbar navbar-static-top">
 					<!-- Sidebar toggle button-->
@@ -96,7 +98,9 @@
 						</ul>
 					</div>
 				</nav>
+			
 			</header>
+		
 			<aside class="main-sidebar">
 				<!-- sidebar-->
 				<section class="sidebar position-relative">
@@ -172,7 +176,7 @@
 					</div>
 				</section>
 			</aside>
-
+			}
 			<div class="content-wrapper">
 				<main role="main" class="pb-3">
 					@RenderBody()

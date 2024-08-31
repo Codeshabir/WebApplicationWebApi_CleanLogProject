@@ -1,9 +1,11 @@
+using Client.Areas.Identity.Data;
 using Client.Data;
 using Client.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("ClientContextConnection") ?? throw new InvalidOperationException("Connection string 'ClientContextConnection' not found.");
 
 // Build the configuration
 var configuration = builder.Configuration;
@@ -15,16 +17,14 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<LogDbContext>(options =>
 	options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddDefaultIdentity<ClientUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<LogDbContext>();
+
 // Register the service
 builder.Services.AddScoped<CleaningLogsService>();
 builder.Services.AddScoped<LandscapingLogsService>();
 builder.Services.AddScoped<SnowLogsService>();
-builder.Services.AddScoped<SpeechToTextService>(provider =>
-{
-    // Configure and return an instance of SpeechToTextService
-    var modelPath = configuration.GetValue<string>("SpeechToText:ModelPath");
-    return new SpeechToTextService(modelPath);
-});
+
 
 // Add a named HttpClient with the base URL for API requests
 var baseUrl = configuration.GetSection("ApiSettings:BaseUrl").Value;
@@ -62,6 +62,7 @@ if (!app.Environment.IsDevelopment())
 	app.UseExceptionHandler("/Home/Error");
 	app.UseHsts();
 }
+builder.Services.AddRazorPages(); 
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -74,8 +75,12 @@ app.UseCors("AllowAllOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-	name: "default",
-	pattern: "{controller=CleaningLogs}/{action=Index}/{id?}");
 
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=CleaningLogs}/{action=Index}/{id?}");
+    endpoints.MapRazorPages(); // Map Razor Pages endpoints
+});
 app.Run();

@@ -13,8 +13,8 @@ using System.Threading.Tasks;
 
 namespace Client.Controllers
 {
-  
 
+    [Authorize]
     public class CleaningLogsController : Controller
     {
         private readonly CleaningLogsService _cleaninglogsService;

@@ -1,11 +1,13 @@
-﻿using Client.Model;
+﻿using Client.Areas.Identity.Data;
+using Client.Model;
 using Client.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
 namespace Client.Data
 {
-    public class LogDbContext : DbContext
+    public class LogDbContext : IdentityDbContext<ClientUser>
     {
         public LogDbContext(DbContextOptions<LogDbContext> options)
             : base(options)
@@ -15,17 +17,10 @@ namespace Client.Data
         public DbSet<CleaningLog> houseCleaningLogs { get; set; }
         public DbSet<LandscapingLogs> landscapingLogs { get; set; }
         public DbSet<SnowLogs> snowLogs { get; set; }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            //base.OnModelCreating(modelBuilder);
-            //modelBuilder.Entity<House>(entity =>
-            //{
-
-            //    entity.Property(e => e.Rent)
-            //        .HasColumnType("decimal(18, 2)"); // Adjust precision and scale as needed
-            //});
-
-            // Other entity configurations
+            base.OnModelCreating(builder);
+      
         }
     }
 
