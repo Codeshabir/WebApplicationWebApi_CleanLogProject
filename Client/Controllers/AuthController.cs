@@ -4,9 +4,11 @@ using Microsoft.Extensions.Logging;
 using Client.Areas.Identity.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Client.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -21,6 +23,11 @@ namespace Client.Controllers
             _signInManager = signInManager;
             _logger = logger;
         }
+        //public IActionResult Index()
+        //{
+        //    ViewData["UserID"] = _userManager.GetUserId(this.User);
+        //    return View();
+        //}
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
@@ -80,7 +87,16 @@ namespace Client.Controllers
 
             return BadRequest(ModelState);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login", "Account");
+        }
     }
+
 
     public class RegisterModel
     {
